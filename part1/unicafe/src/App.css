@@ -1,0 +1,26 @@
+  #root {
+    color: #33332d;
+  }  
+  
+  button {
+    box-shadow: -3px 5px #282222;
+    padding: 0.6rem 1rem;
+    border: 3px solid #282222;
+    font-weight: 600;
+    background-color: transparent;
+    margin: 5px;
+  }
+
+  button:hover {
+    background-color: #33332d;
+    color: #fff;
+    cursor: pointer;
+  }
+
+  h1 {
+    font-size: 3rem;
+  }
+
+  .f-900{
+    font-weight: 900;
+  }

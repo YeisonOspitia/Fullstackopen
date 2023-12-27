@@ -6,7 +6,7 @@ function Button({text, handleclick}) {
 }
 function Votacion({votos}) {
   return (
-    <span>has {votos} votes</span>
+    <span>has <b>{votos}</b> votes</span>
   )
 }
 
@@ -21,7 +21,7 @@ function MejorVotacion({title = 'There are no registered votes', votos = 0}){
     <div>
       <Title text={'Anecdote with more votes'}></Title>
       <p>{title}</p>
-      <span>has {votos} votes</span>
+      <span>has <b>{votos}</b> votes</span>
     </div>
   )
 }
@@ -63,7 +63,7 @@ const App = () => {
     }
   }
   return (
-    <div>
+    <div className=''>
       <Title text={'Anecdote of the day'}></Title>
       <p>{anecdotes[selected]}</p>   
       <div>

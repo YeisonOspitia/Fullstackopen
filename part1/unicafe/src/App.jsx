@@ -21,7 +21,7 @@ function Button({text, handleclick}){
 function StatisticLine({text, variable}){
   return (
     <tr>
-      <td>{text}</td>
+      <td className="f-900">{text}</td>
       <td>{variable}</td>
     </tr>
   )
@@ -72,14 +72,14 @@ function App() {
     }
   }
   return (
-    <>
+    <div className="container">
       <Header text="give feedback"></Header>
       <Button text="Good" handleclick={FuncionButton(good,setGood,1)}></Button>
       <Button text="Neutral" handleclick={FuncionButton(neutral,setNeutral,0)}></Button>
       <Button text="Bad" handleclick={FuncionButton(bad,setBad,-1)}></Button>
       <Header text="Statistics"></Header>
       <Statistics good={good} neutral={neutral} bad={bad} all={all} average={average.toFixed(1)} positive={positive} />
-    </>
+    </div>
   )
 }
 
