@@ -1,0 +1,35 @@
+sequenceDiagram
+    participant browser
+    participant server
+
+    browser->>server: POST https://studies.cs.helsinki.fi/exampleapp/new_note
+    Note right of browser: The browser responds with a 302 redirect
+
+    browser->>server: GET https://studies.cs.helsinki.fi/exampleapp/notes
+    activate server
+    server-->>browser: HTML document
+        Note right of browser: The browser responds with a 304, The requested resource has not been modified since it was last accessed
+    deactivate server
+    
+
+    browser->>server: GET https://studies.cs.helsinki.fi/exampleapp/main.css
+    activate server
+    server-->>browser: the css file
+            Note right of browser: The browser responds with a 304, The requested resource has not been modified since it was last accessed
+    deactivate server
+
+    browser->>server: GET https://studies.cs.helsinki.fi/exampleapp/main.js
+    activate server
+    server-->>browser: the JavaScript file
+        Note right of browser: The browser responds with a 304, The requested resource has not been modified since it was last accessed
+    deactivate server
+    Note right of browser: The browser starts executing the JavaScript code that fetches the JSON from the server
+
+    browser->>server: GET https://studies.cs.helsinki.fi/exampleapp/data.json
+    activate server
+    server-->>browser: [{ "content": "HTML is easy", "date": "2023-1-1" }, ... ]
+    deactivate server
+
+    Note right of browser: The browser executes the callback function that renders the notes
+
+    Note right of browser: the summary, send the request to add a new note, this request reaches the server, it redirects the request, then the page requests are made again and in which a change is not necessary it responds with a 304, the requests it makes They are the same as when starting the page
