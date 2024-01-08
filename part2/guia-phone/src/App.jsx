@@ -1,12 +1,13 @@
 import './App.css'
 import React, { useState, useEffect } from 'react'
 import axios from 'axios'
+import personsService from './services/persons.jsx'
 
-const Numbers = ({list}) =>{
+const Numbers = ({list, functionDelete}) =>{
   return (
     <div>
       {list.map(number => (
-        <li key={number.name}>{number.name}   {number.number}</li>
+        <li key={number.id}>{number.name}   {number.number} <button onClick={() => {functionDelete(number.id, number.name)}}>Delete</button></li>
       ))}
     </div>
   )
@@ -18,6 +19,30 @@ const Filter = ({value, functionFilter}) =>{
       filter shown with <input type= "text" value={value} onChange={functionFilter} />
     </div>
 
+  )
+}
+
+const ErrorMessage = ({ message }) => {
+  if (message === null) {
+    return null
+  }
+  
+  return (
+    <div className="notificacion error">
+      {message}
+    </div>
+  )
+}
+
+const SuccessMessage = ({ message }) => {
+  if (message === null) {
+    return null
+  }
+  
+  return (
+    <div className="notificacion success">
+      {message}
+    </div>
   )
 }
 
@@ -42,17 +67,19 @@ function App() {
   const [ newName, setNewName ] = useState('')
   const [ newPhone, setNewPhone ] = useState('')
   const [ filter, setFilter ] = useState('')
+  const [errorMessage, setErrorMessage] = useState(null)
+  const [successMessage, setSuccessMessage] = useState(null)
 
   
 
   const [ personsShow, setPersonsShow ] = useState(persons)
 
   useEffect(() => {
-    axios
-        .get('http://localhost:3001/persons')
-        .then(response => {
-          setPersons(response.data)
-          setPersonsShow(response.data)
+    personsService
+        .getAll()
+        .then(initialPersons  => {
+          setPersons(initialPersons)
+          setPersonsShow(initialPersons)
         })
   }, [])
 
@@ -72,31 +99,78 @@ function App() {
     setPersonsShow(personsFilter)
   }
 
+  const actualizarEstados = (param, message) => {
+    setPersons(param)
+    setPersonsShow(param)
+    setNewName('')
+    setNewPhone('')
+    setFilter('')
+    setSuccessMessage(message)
+    setTimeout(() => {
+      setSuccessMessage(null)
+    }, 5000)
+  }
+
+  const functionDelete = (id, name) => {
+    if (window.confirm(`Delete ${name}`)) {
+      personsService
+          .eliminar(id)
+          .then(returedList => {
+            personsService.getAll()
+            .then(initialPersons  => {
+              setPersons(initialPersons)
+              setPersonsShow(initialPersons)
+              setSuccessMessage('The contact has been successfully deleted')
+              setTimeout(() => {
+                setSuccessMessage(null)
+              }, 5000)
+            })
+          })
+          .catch(error => {
+            setErrorMessage(
+              `Note '${note.content}' was already removed from server`
+            )
+            setTimeout(() => {
+              setErrorMessage(null)
+            }, 5000)
+          })
+    }
+  }
+
   const newContact = (event) => {
     event.preventDefault()
 
     if(newName === "" || newPhone === ""){
       return alert("You cannot register an empty number")
     }
+    const newContact = {
+      name: newName,
+      number: newPhone,
+    }
 
     const foundPerson = persons.find(person => person.name === newName);
     if(foundPerson){
-      return alert(`${newName} is already added to phonebook`)
+      if (window.confirm(`${newName} is already added to phonebook, replace the old number with a new one?`)) {
+        personsService
+            .update(foundPerson.id, newContact)
+            .then(returedPerson => {
+              const nuevaLista = persons.map( person => person.name !== newName ? person : returedPerson)
+              actualizarEstados(nuevaLista, 'The contact has been successfully updated' )
+            })
+      }
+      return false
     }
     const foundPhone = persons.find(person => person.number === newPhone);
     if(foundPhone){
       return alert(`${newPhone} is already added to phonebook`)
     }
-    const newContact = {
-      name: newName,
-      number: newPhone,
-    }
-    const NewDirectory = persons.concat(newContact);
-    setPersons(NewDirectory)
-    setNewName('')
-    setNewPhone('')
-    setFilter('')
-    setPersonsShow(NewDirectory)
+    
+    
+    personsService
+      .create(newContact)
+      .then(returnedNote  => {
+        actualizarEstados(persons.concat(returnedNote), 'The contact has been successfully created')
+      })
 
   }
 
@@ -106,8 +180,10 @@ function App() {
       <Filter value={filter} functionFilter={handleFilterChange}></Filter>
       <h3>Add a new</h3>
       <FormAddNew valueName={newName} valuePhone={newPhone} functionName={handleNameChange} functionPhone={handlePhoneChange} functionAddContact={newContact}></FormAddNew>
+      <ErrorMessage message={errorMessage} />
+      <SuccessMessage message={successMessage} />
       <h2>Numbers</h2>
-      <Numbers list={personsShow}></Numbers>
+      <Numbers functionDelete={functionDelete} list={personsShow}></Numbers>
     </div>
   )
 }
