@@ -99,16 +99,18 @@ function App() {
     setPersonsShow(personsFilter)
   }
 
-  const actualizarEstados = (param, message) => {
+  const actualizarEstados = (param, message = null) => {
     setPersons(param)
     setPersonsShow(param)
     setNewName('')
     setNewPhone('')
     setFilter('')
-    setSuccessMessage(message)
-    setTimeout(() => {
-      setSuccessMessage(null)
-    }, 5000)
+    if(message){
+      setSuccessMessage(message)
+      setTimeout(() => {
+        setSuccessMessage(null)
+      }, 5000)
+    }
   }
 
   const functionDelete = (id, name) => {
@@ -128,11 +130,13 @@ function App() {
           })
           .catch(error => {
             setErrorMessage(
-              `Note '${note.content}' was already removed from server`
+              `Persons '${name}' was already removed from server`
             )
             setTimeout(() => {
               setErrorMessage(null)
             }, 5000)
+            const listupdated = persons.filter(n => n.id !== id);
+            actualizarEstados(listupdated)
           })
     }
   }
@@ -156,6 +160,16 @@ function App() {
             .then(returedPerson => {
               const nuevaLista = persons.map( person => person.name !== newName ? person : returedPerson)
               actualizarEstados(nuevaLista, 'The contact has been successfully updated' )
+            })
+            .catch(error => {
+              setErrorMessage(
+                `Persons '${newName}' was already removed from server`
+              )
+              setTimeout(() => {
+                setErrorMessage(null)
+              }, 5000)
+              const listupdated = persons.filter(n => n.name !== newName);
+              actualizarEstados(listupdated)
             })
       }
       return false
